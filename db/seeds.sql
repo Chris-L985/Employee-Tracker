@@ -17,14 +17,14 @@ VALUES
 
 INSERT INTO Employee (first_name, last_name, role_id, manager_id)
 VALUES 
-('Michael', 'Myers', 2, 1),
-('Freddy', 'Krueger', 1, 1),
-('Jason', 'Vorhees', 3, 2),
-('Patrick', 'Bateman', 3, 2),
-('Hannibal', 'Lectar', 4, 2),
-('Jack', 'Torrance', 2, 1),
-('Norman', 'Bates', 1, 2),
-('Laurie', 'Strode', 5, 2),
-('Damien', 'Thorn', 7, 4),
-('Ashley', 'Williams', 6, 2),
-('Bill', 'Overbeck', 7, 4);
+('Michael', 'Myers', 2, 2),
+('Freddy', 'Krueger', 1, NULL),
+('Jason', 'Vorhees', 3, NULL),
+('Patrick', 'Bateman', 4, NULL),
+('Hannibal', 'Lectar', 4, NULL),
+('Jack', 'Torrance', 2, 2),
+('Norman', 'Bates', 6, 8),
+('Laurie', 'Strode', 5,NULL),
+('Damien', 'Thorn', 7, 8),
+('Ashley', 'Williams', 6, 8),
+('Bill', 'Overbeck', 7, 8);
