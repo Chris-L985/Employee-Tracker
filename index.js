@@ -30,6 +30,7 @@ const updateEmployeesList = () => {
             console.table(rows);
             updateEmployeesList();
           });
+        //  else if to view roles
         } else if (inqProceed.initialPrompt === "View all roles") {
           db.query(
             `SELECT role.id, role.title, role.salary, department.name AS department
@@ -41,6 +42,7 @@ const updateEmployeesList = () => {
               updateEmployeesList();
             }
           );
+          //else if to go to employees
         } else if (inqProceed.initialPrompt === "View all employees") {
           db.query(
             `SELECT e.id, e.first_name, e.last_name, role.title AS title, department.name AS department, role.salary AS salary, CONCAT(m.first_name," ",m.last_name) AS manager
@@ -54,6 +56,7 @@ const updateEmployeesList = () => {
               updateEmployeesList();
             }
           );
+          // else if to add a department
         } else if (inqProceed.initialPrompt === "Add a department") {
           return inquirer
             .prompt({
@@ -61,29 +64,31 @@ const updateEmployeesList = () => {
               name: "department",
               message: "New Department:",
             })
-            .then((newDepartment) => {
-              const param = [newDepartment.department];
+            .then((addDepartment) => {
+              const param = [addDepartment.department];
               db.query(
                 `INSERT INTO department (name)
                         VALUES (?)`,
                 param,
                 (err, result) => {
                   if (err) {
-                    console.log("Department already exists");
+                    console.log("This department already exists");
                     updateEmployeesList();
                   } else {
-                    console.log(`${param} has been added`);
+                    console.log(`${param} has been added to the list`);
                     updateEmployeesList();
                   }
                 }
               );
             });
+            // else if to add a role
         } else if (inqProceed.initialPrompt === "Add a role") {
           db.query(`SELECT DISTINCT * FROM department`, (err, row) => {
             if (err) {
               console.log(`Error: ${err}`);
               updateEmployeesList();
             } else {
+                // new role information input
               return inquirer
                 .prompt([
                   {
@@ -107,8 +112,8 @@ const updateEmployeesList = () => {
                     message: "Department for new role:",
                   },
                 ])
-                .then((newRole) => {
-                  const param = [newRole.department];
+                .then((addRole) => {
+                  const param = [addRole.department];
                   db.query(
                     `SELECT id FROM department WHERE name = ?`,
                     param,
@@ -119,8 +124,8 @@ const updateEmployeesList = () => {
                       } else {
                         let departmentId = row[0].id;
                         const param = [
-                          newRole.title,
-                          newRole.salary,
+                          addRole.title,
+                          addRole.salary,
                           departmentId,
                         ];
                         db.query(
@@ -135,7 +140,7 @@ const updateEmployeesList = () => {
                               updateEmployeesList();
                             } else {
                               console.log(
-                                `The ${newRole.title} role has been added to the ${newRole.department} department`
+                                `The ${addRole.title} role has been added to the ${addRole.department} department`
                               );
                               updateEmployeesList();
                             }
@@ -147,6 +152,7 @@ const updateEmployeesList = () => {
                 });
             }
           });
+          // inquire adding new employee information
         } else if (inqProceed.initialPrompt === "Add an employee") {
           let sql = `SELECT * FROM role; SELECT id, CONCAT(first_name," ",last_name) AS full_name FROM employee`;
           db.query(sql, (err, row) => {
@@ -154,6 +160,7 @@ const updateEmployeesList = () => {
               console.log(`Error: ${err}`);
               updateEmployeesList();
             } else {
+                // new employee input
               return inquirer
                 .prompt([
                   {
@@ -187,9 +194,10 @@ const updateEmployeesList = () => {
                     message: "Manager:",
                   },
                 ])
-                .then((newEmployee) => {
-                  if (newEmployee.manager === "None") {
-                    const param = [newEmployee.role];
+                // add employee manager info
+                .then((addEmployee) => {
+                  if (addEmployee.manager === "None") {
+                    const param = [addEmployee.role];
                     let sql = `SELECT id FROM role WHERE title = ?`;
                     db.query(sql, param, (err, row) => {
                       if (err) {
@@ -198,8 +206,8 @@ const updateEmployeesList = () => {
                       } else {
                         let roleId = row[0].id;
                         const param = [
-                          newEmployee.firstName,
-                          newEmployee.lastName,
+                          addEmployee.firstName,
+                          addEmployee.lastName,
                           roleId,
                           null,
                         ];
@@ -213,7 +221,7 @@ const updateEmployeesList = () => {
                               updateEmployeesList();
                             } else {
                               console.log(
-                                `${newEmployee.firstName} ${newEmployee.lastName} has been added to the list.`
+                                `${addEmployee.firstName} ${addEmployee.lastName} has been added to the list.`
                               );
                               updateEmployeesList();
                             }
@@ -222,9 +230,9 @@ const updateEmployeesList = () => {
                       }
                     });
                   } else {
-                    let managerArray = newEmployee.manager.split(" ", 2);
+                    let managerArray = addEmployee.manager.split(" ", 2);
                     const param = [
-                      newEmployee.role,
+                      addEmployee.role,
                       managerArray[0],
                       managerArray[1],
                     ];
@@ -237,8 +245,8 @@ const updateEmployeesList = () => {
                         let roleId = row[0][0].id;
                         let managerId = row[1][0].id;
                         const param = [
-                          newEmployee.firstName,
-                          newEmployee.lastName,
+                          addEmployee.firstName,
+                          addEmployee.lastName,
                           roleId,
                           managerId,
                         ];
@@ -252,7 +260,7 @@ const updateEmployeesList = () => {
                               updateEmployeesList();
                             } else {
                               console.log(
-                                `${newEmployee.firstName} ${newEmployee.lastName} has been added to the list.`
+                                `${addEmployee.firstName} ${addEmployee.lastName} has been added to the list.`
                               );
                               updateEmployeesList();
                             }
@@ -281,7 +289,7 @@ const updateEmployeesList = () => {
                       row[1].forEach((item) => choiceArray.push(item.full_name));
                       return choiceArray;
                     },
-                    message: "Which employee do you want to update?",
+                    message: "Whose information would you like to update?",
                   },
                   {
                     type: "list",
@@ -291,7 +299,7 @@ const updateEmployeesList = () => {
                       row[0].forEach((item) => choiceArray.push(item.title));
                       return choiceArray;
                     },
-                    message: "What is their new role?",
+                    message: "What new role would you like applied?",
                   },
                 ])
                 .then((newEmployeeRole) => {
@@ -332,7 +340,7 @@ const updateEmployeesList = () => {
           });
         } else {
           console.log(
-            "Type 'node index' to try again."
+            "Type 'node index.js' to try again."
           );
           db.end();
         }
